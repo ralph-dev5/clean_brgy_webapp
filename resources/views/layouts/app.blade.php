@@ -8,14 +8,6 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-        @auth
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition">
-                    Logout
-                </button>
-            </form>
-        @endauth
     </header>
 
     <!-- Main Content -->
