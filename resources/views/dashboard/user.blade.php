@@ -41,6 +41,7 @@
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -68,6 +69,20 @@
                                 <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $colors[$status] ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ $status }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-3">
+                                <!-- Delete button for finished reports -->
+                                @if(strtolower($report->status ?? '') === 'resolved' || strtolower($report->status ?? '') === 'completed')
+                                    <form action="{{ route('report.destroy', $report->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this report?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-gray-400 text-sm">-</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

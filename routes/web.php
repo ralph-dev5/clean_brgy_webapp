@@ -11,66 +11,49 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-/* // Login Routes
+// --------------------
+// Authentication Routes
+// --------------------
+
+// Login accessible to everyone
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Register Routes
+// Register accessible to everyone
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
- */
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
-});
-
+// --------------------
+// Authenticated Routes
+// --------------------
 Route::middleware('auth')->group(function () {
+
+    // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard/user', [DashboardController::class, 'index'])->name('user.dashboard');
-});
+    // User Dashboard
+    Route::get('/dashboard/user', [DashboardController::class, 'user'])->name('user.dashboard');
 
+    // Admin Dashboard
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
-/* // USER DASHBOARD
-Route::get('/dashboard/user', [DashboardController::class, 'user'])
-    ->name('user.dashboard')
-    ->middleware('auth');
- */
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard/user', [DashboardController::class, 'index'])->name('user.dashboard');
-});
-
-
-// ADMIN DASHBOARD
-Route::get('/dashboard/admin', [DashboardController::class, 'admin'])
-    ->name('admin.dashboard')
-    ->middleware('auth');
-
-// GENERIC DASHBOARD (redirect by role)
-Route::get('/dashboard', function () {
-    if (auth()->check()) {
+    // Generic Dashboard redirect by role
+    Route::get('/dashboard', function () {
         return auth()->user()->role === 'admin'
             ? redirect()->route('admin.dashboard')
             : redirect()->route('user.dashboard');
-    }
-    return redirect()->route('login');
-})->name('dashboard')->middleware('auth');
+    })->name('dashboard');
 
-// REPORT ROUTES
-Route::get('/report/create', [ReportController::class, 'create'])->name('report.create')->middleware('auth');
-Route::post('/report', [ReportController::class, 'store'])->name('report.store')->middleware('auth');
+    // Report Routes
+    Route::get('/report/create', [ReportController::class, 'create'])->name('report.create');
+    Route::post('/report', [ReportController::class, 'store'])->name('report.store');
 
-// Admin: View all reports
-Route::get('/admin/reports', [ReportController::class, 'index'])
-    ->name('admin.reports.index')
-    ->middleware('auth');
-
-// Admin: View a single report
-Route::get('/admin/reports/{report}', [ReportController::class, 'show'])
-    ->name('admin.reports.show')
-    ->middleware('auth');
+    // Admin Reports Management
+    Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/{report}', [ReportController::class, 'show'])->name('show');
+        Route::get('/{report}/edit', [ReportController::class, 'edit'])->name('edit');
+        Route::put('/{report}/{report}', [ReportController::class, 'update'])->name('update');
+        Route::delete('/{report}', [ReportController::class, 'destroy'])->name('destroy');
+    });
+});
