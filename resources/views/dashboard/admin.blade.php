@@ -1,59 +1,70 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto mt-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">All Garbage Reports</h1>
-        <a href="{{ route('report.create') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-            Add New Report
-        </a>
+<div class="max-w-6xl mx-auto mt-8 px-4">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center bg-white shadow-md rounded-lg px-6 py-4 mb-8">
+        <h2 class="text-2xl font-bold text-green-700">Admin Dashboard</h2>
+
+        <!-- Logout Button -->
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                Logout
+            </button>
+        </form>
     </div>
 
-    @if(session('success'))
-        <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">
-            {{ session('success') }}
+    <!-- Reports Table -->
+    @if($reports->isEmpty())
+        <div class="bg-green-50 border border-green-200 text-green-800 p-6 rounded-xl shadow-sm text-center">
+            <p class="font-medium text-lg">No reports available.</p>
+        </div>
+    @else
+        <div class="overflow-x-auto bg-white shadow-lg rounded-2xl">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-green-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach($reports as $report)
+                        <tr class="hover:bg-green-50 transition">
+                            <td class="px-6 py-3">{{ $report->id }}</td>
+                            <td class="px-6 py-3">{{ Str::limit($report->description, 50) }}</td>
+                            <td class="px-6 py-3">{{ $report->location ?? '-' }}</td>
+                            <td class="px-6 py-3">
+                                @if($report->image)
+                                    <img src="{{ asset('storage/' . $report->image) }}" 
+                                         class="w-20 h-16 object-cover rounded-lg shadow-sm">
+                                @else
+                                    <span class="text-gray-400">No Image</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-3">
+                                <!-- Delete Report Button -->
+                                <form action="{{ route('admin.reports.destroy', $report->id) }}" method="POST" 
+                                      onsubmit="return confirm('Are you sure you want to delete this report?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">
+                                        Delete Report
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     @endif
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="px-4 py-2 border">ID</th>
-                    <th class="px-4 py-2 border">Resident</th>
-                    <th class="px-4 py-2 border">Location</th>
-                    <th class="px-4 py-2 border">Description</th>
-                    <th class="px-4 py-2 border">Image</th>
-                    <th class="px-4 py-2 border">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($reports as $report)
-                <tr>
-                    <td class="px-4 py-2 border">{{ $report->id }}</td>
-                    <td class="px-4 py-2 border">{{ $report->user->name }}</td>
-                    <td class="px-4 py-2 border">{{ $report->type }}</td>
-                    <td class="px-4 py-2 border">{{ Str::limit($report->description, 50) }}</td>
-                    <td class="px-4 py-2 border">
-                        @if($report->image)
-                        <img src="{{ asset('storage/' . $report->image) }}" class="w-24 h-auto rounded">
-                        @else
-                        N/A
-                        @endif
-                    </td>
-                    <td class="px-4 py-2 border">
-                        <a href="{{ route('admin.reports.show', $report->id) }}" class="text-blue-600 hover:underline">
-                            View
-                        </a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="text-center px-4 py-2 border">No reports found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
 </div>
 @endsection
