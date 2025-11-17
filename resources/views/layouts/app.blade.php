@@ -8,9 +8,6 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="bg-blue-600 text-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">Clean Brgy App</h1>
         @auth
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
