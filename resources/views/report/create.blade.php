@@ -1,41 +1,47 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-lg mx-auto mt-10 p-6 bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Submit a Report</h1>
+<div class="max-w-lg mx-auto p-6 bg-white shadow rounded">
+    <h2 class="text-xl font-bold mb-4">Submit a Report</h2>
 
-    @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>- {{ $error }}</li>
+    @if($errors->any())
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
-    <form method="POST" action="{{ route('report.store') }}" enctype="multipart/form-data">
+    <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <!-- Location Field -->
-        <div class="mb-4">
-            <label for="location" class="block mb-1 font-semibold">Location</label>
-            <input type="text" name="location" id="location" class="w-full border px-3 py-2 rounded" placeholder="E.g., Garbage, Road Issue" required>
-        </div>
+        <!-- Type -->
+        <label for="type" class="block font-semibold">Type</label>
+        <select name="type" id="type" class="w-full border px-3 py-2 rounded mb-4" required>
+            <option value="">-- Select type --</option>
+            <option value="Garbage" {{ old('type') == 'Garbage' ? 'selected' : '' }}>Garbage</option>
+            <option value="Road Issue" {{ old('type') == 'Road Issue' ? 'selected' : '' }}>Road Issue</option>
+        </select>
+
+        <!-- Location -->
+        <label for="location" class="block font-semibold">Location</label>
+        <input type="text" name="location" id="location" value="{{ old('location') }}"
+               placeholder="E.g., Street, Barangay" required
+               class="w-full border px-3 py-2 rounded mb-4">
 
         <!-- Description -->
-        <div class="mb-4">
-            <label for="description" class="block mb-1 font-semibold">Description</label>
-            <textarea name="description" id="description" class="w-full border px-3 py-2 rounded" rows="5" placeholder="Describe the issue..." required></textarea>
-        </div>
+        <label for="description" class="block font-semibold">Description</label>
+        <textarea name="description" id="description" rows="4" placeholder="Describe the issue..." required
+                  class="w-full border px-3 py-2 rounded mb-4">{{ old('description') }}</textarea>
 
         <!-- Image -->
-        <div class="mb-4">
-            <label for="image" class="block mb-1 font-semibold">Image (optional)</label>
-            <input type="file" name="image" id="image" class="w-full">
-        </div>
+        <label for="image" class="block font-semibold">Image (optional)</label>
+        <input type="file" name="image" id="image" accept="image/*" class="mb-4">
 
-        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+        <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
             Submit Report
         </button>
     </form>
