@@ -27,7 +27,7 @@
     <section class="bg-green-600 text-white py-20">
         <div class="max-w-4xl mx-auto text-center px-4">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to Clean Brgy App</h1>
-            <p class="text-lg md:text-xl mb-8">Submit garbage reports, track statuses, and help keep your barangay clean and organized.</p>
+            <p class="text-lg md:text-xl mb-8">Report basura gusto, Tapon basura ayaw talaga talaga ka ha.</p>
             <a href="{{ route('register') }}" class="bg-white text-green-600 font-semibold px-6 py-3 rounded shadow hover:bg-gray-100 transition">Get Started</a>
         </div>
     </section>
