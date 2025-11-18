@@ -38,7 +38,7 @@
             </h1>
 
             <p class="text-lg md:text-xl mb-10 opacity-90">
-                Report basura gusto, tapon basura ayaw — talaga ka ha.
+                Report basura gusto, tapon basura ayaw — talaga talaga ka ha.
             </p>
 
             <a href="{{ route('register') }}"
