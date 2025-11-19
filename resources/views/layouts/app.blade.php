@@ -8,8 +8,6 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-    </header>
-
     <!-- Main Content -->
     <main class="flex-1 p-6">
         @if(session('success'))
@@ -21,10 +19,12 @@
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-200 text-gray-700 p-4 text-center">
-        &copy; {{ date('Y') }} Clean Brgy App. All rights reserved.
-    </footer>
+    <!-- Footer (only on welcome page) -->
+    @if(Request::is('/'))
+        <footer class="bg-gray-200 text-gray-700 p-4 text-center">
+            &copy; {{ date('Y') }} Clean Brgy App. All rights reserved.
+        </footer>
+    @endif
 
 </body>
 </html>

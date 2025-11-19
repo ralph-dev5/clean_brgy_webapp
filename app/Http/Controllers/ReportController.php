@@ -8,13 +8,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    // Show the report form for users
+    /**
+     * Show the report creation form for users.
+     */
     public function create()
     {
         return view('report.create');
     }
 
-    // Store a new report
+    /**
+     * Store a new user report.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -33,31 +37,59 @@ class ReportController extends Controller
             'type' => $request->type,
             'description' => $request->description,
             'image' => $imagePath,
+            'status' => 'pending', // Default status
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Report sent to admin.');
+        return redirect()->route('dashboard')->with('success', 'Report submitted successfully.');
     }
 
-    // Admin: List all reports
+    /**
+     * User: Delete a report (only their own reports).
+     */
+    public function destroy(Report $report)
+    {
+        if ($report->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($report->image) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        $report->delete();
+
+        return redirect()->route('user.dashboard')->with('success', 'Report deleted successfully.');
+    }
+
+    /**
+     * Admin: Show list of all reports.
+     */
     public function index()
     {
-        $reports = Report::with('user')->orderBy('created_at', 'desc')->get();
+        $reports = Report::with('user')->latest()->get();
         return view('admin.reports.index', compact('reports'));
     }
 
-    // Admin: Show single report
+    /**
+     * Admin: Show single report details.
+     */
     public function show(Report $report)
     {
+        $report->load('user');
         return view('admin.reports.show', compact('report'));
     }
 
-    // Admin: Edit report
+    /**
+     * Admin: Show edit form for a report.
+     */
     public function edit(Report $report)
     {
         return view('admin.reports.edit', compact('report'));
     }
 
-    // Admin: Update report
+    /**
+     * Admin: Update a report.
+     */
     public function update(Request $request, Report $report)
     {
         $request->validate([
@@ -73,21 +105,11 @@ class ReportController extends Controller
             $report->image = $request->file('image')->store('reports', 'public');
         }
 
-        $report->type = $request->type;
-        $report->description = $request->description;
-        $report->save();
+        $report->update([
+            'type' => $request->type,
+            'description' => $request->description,
+        ]);
 
         return redirect()->route('admin.reports.index')->with('success', 'Report updated successfully.');
-    }
-
-    // Admin: Delete report
-    public function destroy(Report $report)
-    {
-        if ($report->image) {
-            Storage::disk('public')->delete($report->image);
-        }
-        $report->delete();
-
-        return redirect()->route('admin.reports.index')->with('success', 'Report deleted successfully.');
     }
 }

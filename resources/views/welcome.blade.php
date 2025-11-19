@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="text-2xl font-bold text-green-600">
-                    Clean Brgy App
+                    
                 </div>
                 <div class="space-x-2">
                     <a href="{{ route('login') }}" 
