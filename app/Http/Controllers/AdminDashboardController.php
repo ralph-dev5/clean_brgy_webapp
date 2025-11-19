@@ -10,14 +10,20 @@ class AdminDashboardController extends Controller
     /**
      * Show admin dashboard.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        // Fetch all reports for admin
-        $reports = Report::with('user')->latest()->get();
+        // Get selected status from URL (?status=)
+        $status = $request->get('status', 'pending'); 
+        // default to pending if none is selected
 
-        return view('dashboard.admin', compact('user', 'reports'));
+        // Fetch reports with status filtering
+        $reports = Report::with('user')
+            ->where('status', $status)
+            ->latest()
+            ->get();
+
+        return view('dashboard.admin', compact('user', 'reports', 'status'));
     }
 }
-

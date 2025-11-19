@@ -5,7 +5,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminReportController;
 
 // -------------------------------------
 // Homepage
@@ -38,9 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/user', [DashboardController::class, 'user'])
         ->name('user.dashboard');
 
-    // Admin dashboard
-    Route::get('/dashboard/admin', [AdminController::class, 'dashboard'])
+    // Admin dashboard (AdminController version)
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
         ->name('admin.dashboard');
+
+    // Optional: AdminDashboardController version (can remove if you use AdminController)
+    // Route::get('/dashboard/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     // Auto-redirect based on role
     Route::get('/dashboard', function () {
@@ -64,22 +69,21 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
 
         // Admin profile
-        Route::get('/profile', [AdminController::class, 'profile'])
-            ->name('profile');
+        Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
 
         // Admin history
-        Route::get('/history', [AdminController::class, 'history'])
-            ->name('history');
+        Route::get('/history', [AdminController::class, 'history'])->name('history');
 
-        // -------------------------
+        // Admin reports overview page
+        Route::get('/reports', [AdminDashboardController::class, 'index'])->name('reports');
+
         // Admin Report Management
-        // -------------------------
         Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', [ReportController::class, 'index'])->name('index');
-            Route::get('/{report}', [ReportController::class, 'show'])->name('show');
-            Route::get('/{report}/edit', [ReportController::class, 'edit'])->name('edit');
-            Route::put('/{report}', [ReportController::class, 'update'])->name('update');
-            Route::delete('/{report}', [ReportController::class, 'destroy'])->name('destroy');
+            Route::get('/', [AdminReportController::class, 'index'])->name('index');            // List reports
+            Route::get('/{report}', [AdminReportController::class, 'show'])->name('show');      // View single report
+            Route::get('/{report}/edit', [AdminReportController::class, 'edit'])->name('edit'); // Edit report
+            Route::put('/{report}', [AdminReportController::class, 'update'])->name('update');  // Update report
+            Route::delete('/{report}', [AdminReportController::class, 'destroy'])->name('destroy'); // Delete report
         });
 
     });

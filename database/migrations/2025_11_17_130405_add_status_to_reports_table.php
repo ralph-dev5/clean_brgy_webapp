@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reports', function (Blueprint $table) {
-            $table->string('status')->default('Pending'); // Add status column with default value
+            $table->string('status')->default('pending'); // Add status column with default value
         });
     }
 
