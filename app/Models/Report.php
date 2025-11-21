@@ -16,9 +16,8 @@ class Report extends Model
      */
     protected $fillable = [
         'user_id',
-        'title',
+        'type',
         'description',
-        'location',
         'image',
         'status', // Allowed values: 'pending', 'in-progress', 'resolved'
     ];

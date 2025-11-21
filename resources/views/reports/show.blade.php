@@ -44,7 +44,10 @@
 
         <!-- Actions -->
         <div class="mt-6 flex gap-2">
-            
+            <a href="{{ route('admin.reports.edit', $report) }}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                Edit
+            </a>
 
             <form action="{{ route('admin.reports.destroy', $report) }}" method="POST">
                 @csrf

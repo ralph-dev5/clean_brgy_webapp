@@ -61,7 +61,6 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-2 text-left">ID</th>
-                        <th class="px-4 py-2 text-left">Type</th>
                         <th class="px-4 py-2 text-left">Location</th>
                         <th class="px-4 py-2 text-left">Description</th>
                         <th class="px-4 py-2 text-left">Image</th>
@@ -73,7 +72,6 @@
                     @forelse($reports as $report)
                         <tr class="hover:bg-green-50 transition">
                             <td class="px-4 py-2">{{ $report->id }}</td>
-                            <td class="px-4 py-2">{{ $report->type }}</td>
                             <td class="px-4 py-2">{{ $report->location }}</td>
                             <td class="px-4 py-2">{{ Str::limit($report->description, 50) }}</td>
                             <td class="px-4 py-2">
@@ -106,7 +104,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-2 text-gray-600 text-center">
+                            <td colspan="6" class="px-4 py-2 text-gray-600 text-center">
                                 No reports submitted yet.
                             </td>
                         </tr>
@@ -121,5 +119,4 @@
         </div>
     </main>
 </body>
-
 </html>

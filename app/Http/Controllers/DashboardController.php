@@ -36,7 +36,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $trashedReports = Report::onlyTrashed()
+        $trashedReports = Report::onlyTrashed()     
             ->where('user_id', $user->id)
             ->latest()
             ->paginate(10);

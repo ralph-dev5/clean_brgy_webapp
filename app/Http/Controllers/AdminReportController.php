@@ -66,7 +66,7 @@ class AdminReportController extends Controller
         $report->update($request->only('type', 'description', 'status'));
 
         return redirect()->route('admin.reports.index')
-            ->with('success', 'Report updated successfully.');
+                         ->with('success', 'Report updated successfully.');
     }
 
     /**
@@ -90,8 +90,9 @@ class AdminReportController extends Controller
     {
         $report->delete();
 
-        return redirect()->route('admin.reports.index')
-            ->with('success', 'Report moved to Trash.');
+        // Redirect to admin dashboard welcome page
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'Report moved to Trash.');
     }
 
     /**
@@ -121,7 +122,7 @@ class AdminReportController extends Controller
         $report->restore();
 
         return redirect()->route('admin.reports.trash')
-            ->with('success', 'Report restored successfully.');
+                         ->with('success', 'Report restored successfully.');
     }
 
     /**
@@ -138,6 +139,6 @@ class AdminReportController extends Controller
         $report->forceDelete();
 
         return redirect()->route('admin.reports.trash')
-            ->with('success', 'Report permanently deleted.');
+                         ->with('success', 'Report permanently deleted.');
     }
 }

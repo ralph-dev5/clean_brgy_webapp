@@ -20,12 +20,12 @@
 
             <nav class="flex flex-col gap-2">
                 <a href="{{ route('user.dashboard') }}" class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
-                    {{ request()->routeIs('user.dashboard') ? 'font-semibold bg-green-100' : '' }}">
+                   {{ request()->routeIs('user.dashboard') ? 'font-semibold bg-green-100' : '' }}">
                     My Reports
                 </a>
 
                 <a href="{{ route('report.create') }}" class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
-                    {{ request()->routeIs('report.create') ? 'font-semibold bg-green-100' : '' }}">
+                   {{ request()->routeIs('report.create') ? 'font-semibold bg-green-100' : '' }}">
                     Submit New Report
                 </a>
 
@@ -44,16 +44,24 @@
     <main class="flex-1 p-10">
         <h1 class="text-3xl font-bold mb-6">Submit New Report</h1>
 
+        <!-- Flash Messages -->
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-100 text-green-800 rounded shadow">
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class="bg-white p-6 rounded shadow max-w-3xl">
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-red-100 text-red-800 rounded shadow">
+                {{ session('error') }}
+            </div>
+        @endif
 
+        <div class="bg-white p-6 rounded shadow max-w-3xl">
             <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
+
+                
 
                 <!-- Location Dropdown -->
                 <div>
@@ -64,13 +72,15 @@
                     <select name="location" id="location"
                         class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
                         required>
-                        <option value="" disabled selected>Select a Purok</option>
+                        <option value="" disabled selected>Select</option>
                         <option value="Purok 1" {{ old('location') == 'Purok 1' ? 'selected' : '' }}>Purok 1</option>
                         <option value="Purok 2" {{ old('location') == 'Purok 2' ? 'selected' : '' }}>Purok 2</option>
                         <option value="Purok 3" {{ old('location') == 'Purok 3' ? 'selected' : '' }}>Purok 3</option>
                         <option value="Purok 4" {{ old('location') == 'Purok 4' ? 'selected' : '' }}>Purok 4</option>
                         <option value="Purok 5" {{ old('location') == 'Purok 5' ? 'selected' : '' }}>Purok 5</option>
+                        <!-- Add more predefined Puroks here -->
                     </select>
+
 
                     @error('location')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
@@ -79,30 +89,26 @@
 
                 <!-- Description -->
                 <div>
-                    <label for="description" class="block text-gray-700 font-medium mb-1">Description *</label>
+                    <label for="description" class="block text-gray-700 font-medium mb-1">
+                        Description <span class="text-red-500">*</span>
+                    </label>
                     <textarea name="description" id="description" rows="4"
-                        placeholder="Describe the issue or concern..."
                         class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                        required>{{ old('description') }}</textarea>
-
+                        placeholder="Describe the issue or concern..." required>{{ old('description') }}</textarea>
                     @error('description')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
 
-                <!-- Image -->
+                <!-- Image Upload -->
                 <div>
                     <label for="image" class="block text-gray-700 font-medium mb-1">Attach Image (optional)</label>
                     <input type="file" name="image" id="image" accept="image/*"
                         class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500">
-
+                    <p class="text-sm text-gray-500 mt-1">Maximum file size: 2MB. Supported formats: JPG, PNG, GIF</p>
                     @error('image')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
                     @enderror
-
-                    <p class="text-gray-500 text-sm mt-1">
-                        Maximum file size: 2MB. Supported formats: JPG, PNG, GIF
-                    </p>
                 </div>
 
                 <!-- Buttons -->
@@ -111,23 +117,15 @@
                         class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                         Submit Report
                     </button>
-
                     <a href="{{ route('user.dashboard') }}"
-                        class="px-6 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
+                        class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
                         Cancel
                     </a>
                 </div>
-            </form>
 
+            </form>
         </div>
     </main>
-
-    <!-- JS: Fill Location -->
-    <script>
-        document.getElementById('fillLocationBtn').addEventListener('click', function () {
-            document.getElementById('location').value = 'Current Location';
-        });
-    </script>
 
 </body>
 

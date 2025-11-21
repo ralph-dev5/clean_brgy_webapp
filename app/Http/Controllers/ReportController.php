@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -24,18 +23,17 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
             'description' => 'required|string',
             'image' => 'nullable|image|max:2048',
         ]);
 
         $report = new Report();
         $report->user_id = Auth::id();
-        $report->type = $request->type;
+        $report->location = $request->location;   // <-- use location now
         $report->description = $request->description;
         $report->status = 'pending';
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             $report->image = $request->file('image')->store('reports', 'public');
         }
@@ -54,12 +52,10 @@ class ReportController extends Controller
     {
         $report = Report::findOrFail($id);
 
-        // Only allow owner to delete
         if ($report->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Delete image if exists
         if ($report->image && Storage::disk('public')->exists($report->image)) {
             Storage::disk('public')->delete($report->image);
         }
