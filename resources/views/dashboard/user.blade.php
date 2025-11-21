@@ -1,4 +1,5 @@
 @php
+    use Illuminate\Support\Facades\Route;
     use Illuminate\Support\Str;
 @endphp
 <!DOCTYPE html>
@@ -18,16 +19,21 @@
         <div class="p-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">User Panel</h2>
             <nav class="flex flex-col gap-2">
-                <a href="{{ route('user.dashboard') }}"
-                   class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
+                <a href="{{ route('user.dashboard') }}" class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
                    {{ request()->routeIs('user.dashboard') ? 'font-semibold bg-green-100' : '' }}">
                     My Reports
                 </a>
-                <a href="{{ route('report.create') }}"
-                   class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
+                <a href="{{ route('report.create') }}" class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
                    {{ request()->routeIs('report.create') ? 'font-semibold bg-green-100' : '' }}">
                     Submit New Report
                 </a>
+                @if (Route::has('settings'))
+                    <a href="{{ route('settings') }}" class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
+       {{ request()->routeIs('settings') ? 'font-semibold bg-green-100' : '' }}">
+                        Settings
+                    </a>
+                @endif
+
                 <form method="POST" action="{{ route('logout') }}" class="mt-4">
                     @csrf
                     <button type="submit"
@@ -77,17 +83,17 @@
                             <td class="px-4 py-2">
                                 @if($report->image)
                                     <img src="{{ asset('storage/' . $report->image) }}" alt="Report Image"
-                                         class="w-20 h-20 object-cover rounded shadow">
+                                        class="w-20 h-20 object-cover rounded shadow">
                                 @else
                                     <span class="text-gray-500 text-sm">No Image</span>
                                 @endif
                             </td>
                             <td class="px-4 py-2">
                                 <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold
-                                      @if($report->status == 'pending') bg-yellow-100 text-yellow-800
-                                      @elseif($report->status == 'in-progress') bg-blue-100 text-blue-800
-                                      @elseif($report->status == 'resolved') bg-green-100 text-green-800
-                                      @else bg-gray-100 text-gray-800 @endif">
+                                                  @if($report->status == 'pending') bg-yellow-100 text-yellow-800
+                                                  @elseif($report->status == 'in-progress') bg-blue-100 text-blue-800
+                                                  @elseif($report->status == 'resolved') bg-green-100 text-green-800
+                                                  @else bg-gray-100 text-gray-800 @endif">
                                     {{ ucfirst($report->status) }}
                                 </span>
                             </td>
@@ -96,7 +102,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
                                         Delete
                                     </button>
                                 </form>
@@ -119,4 +125,5 @@
         </div>
     </main>
 </body>
+
 </html>

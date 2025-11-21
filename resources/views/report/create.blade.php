@@ -61,12 +61,12 @@
             <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
 
-                
+
 
                 <!-- Location Dropdown -->
                 <div>
                     <label for="location" class="block text-gray-700 font-medium mb-1">
-                        Location <span class="text-red-500">*</span>
+                        Location
                     </label>
 
                     <select name="location" id="location"
@@ -78,9 +78,7 @@
                         <option value="Purok 3" {{ old('location') == 'Purok 3' ? 'selected' : '' }}>Purok 3</option>
                         <option value="Purok 4" {{ old('location') == 'Purok 4' ? 'selected' : '' }}>Purok 4</option>
                         <option value="Purok 5" {{ old('location') == 'Purok 5' ? 'selected' : '' }}>Purok 5</option>
-                        <!-- Add more predefined Puroks here -->
                     </select>
-
 
                     @error('location')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
@@ -90,7 +88,7 @@
                 <!-- Description -->
                 <div>
                     <label for="description" class="block text-gray-700 font-medium mb-1">
-                        Description <span class="text-red-500">*</span>
+                        Description
                     </label>
                     <textarea name="description" id="description" rows="4"
                         class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -99,6 +97,7 @@
                         <span class="text-red-600 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
+
 
                 <!-- Image Upload -->
                 <div>

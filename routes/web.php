@@ -22,7 +22,6 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
 
-
 // ---------------------------------------------
 // Authenticated Routes
 // ---------------------------------------------
@@ -38,32 +37,28 @@ Route::middleware(['auth'])->group(function () {
             : redirect()->route('user.dashboard');
     })->name('dashboard');
 
-
     // ---------------------------------------------
     // USER ROUTES
     // ---------------------------------------------
-    Route::middleware(['auth', 'user'])
+    Route::middleware('user')
         ->prefix('dashboard/user')
         ->name('user.')
         ->group(function () {
-            // The main dashboard route
+            // Main dashboard
             Route::get('/', [DashboardController::class, 'user'])->name('dashboard');
-        });
 
-    // User Report Routes
-    Route::middleware(['auth', 'user'])->group(function () {
-        Route::prefix('report')->name('report.')->group(function () {
-            Route::get('/create', [ReportController::class, 'create'])->name('create');
-            Route::post('/', [ReportController::class, 'store'])->name('store');
-            Route::delete('/{id}', [ReportController::class, 'destroy'])->name('destroy');
+            // User Reports
+            Route::prefix('report')->name('report.')->group(function () {
+                Route::get('/create', [ReportController::class, 'create'])->name('create');
+                Route::post('/', [ReportController::class, 'store'])->name('store');
+                Route::delete('/{id}', [ReportController::class, 'destroy'])->name('destroy');
+            });
         });
-    });
-
 
     // ---------------------------------------------
     // ADMIN ROUTES
     // ---------------------------------------------
-    Route::middleware(['admin'])
+    Route::middleware('admin')
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
@@ -71,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
             // Dashboard
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-            // Admin profile
+            // Profile
             Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
             Route::get('/profile/edit', [AdminController::class, 'editProfile'])->name('profile.edit');
             Route::put('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
