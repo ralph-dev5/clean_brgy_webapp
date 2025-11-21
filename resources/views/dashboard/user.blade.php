@@ -1,111 +1,125 @@
-@extends('layouts.app')
+@php
+    use Illuminate\Support\Str;
+@endphp
+<!DOCTYPE html>
+<html lang="en">
 
-@section('content')
-<div class="max-w-6xl mx-auto mt-8 px-4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | Clean Barangay App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-    <!-- Top Navigation Bar -->
-    <div class="flex justify-between items-center bg-white shadow-md rounded-lg px-6 py-4 mb-8">
-        <h2 class="text-2xl font-bold text-green-700">User Dashboard</h2>
+<body class="bg-gray-100 min-h-screen flex font-sans">
 
-        <!-- Logout -->
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                Logout
-            </button>
-        </form>
-    </div>
-
-    <!-- Header with New Report Button -->
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800">Your Reports</h2>
-        <a href="{{ route('report.create') }}"
-           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition shadow">
-            + Submit New Report
-        </a>
-    </div>
-
-    <!-- Empty State -->
-    @if($reports->isEmpty())
-        <div class="bg-green-50 border border-green-200 text-green-800 p-6 rounded-xl shadow text-center">
-            <p class="font-medium text-lg">You haven’t submitted any reports yet.</p>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg h-screen sticky top-0">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">User Panel</h2>
+            <nav class="flex flex-col gap-2">
+                <a href="{{ route('user.dashboard') }}"
+                   class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
+                   {{ request()->routeIs('user.dashboard') ? 'font-semibold bg-green-100' : '' }}">
+                    My Reports
+                </a>
+                <a href="{{ route('report.create') }}"
+                   class="text-gray-700 hover:bg-green-100 px-4 py-2 rounded transition
+                   {{ request()->routeIs('report.create') ? 'font-semibold bg-green-100' : '' }}">
+                    Submit New Report
+                </a>
+                <form method="POST" action="{{ route('logout') }}" class="mt-4">
+                    @csrf
+                    <button type="submit"
+                        class="w-full text-left text-red-600 hover:bg-red-100 px-4 py-2 rounded transition">
+                        Logout
+                    </button>
+                </form>
+            </nav>
         </div>
-    @else
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-10">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Welcome, {{ Auth::user()->name }}!</h1>
+                <p class="text-gray-700 mt-1">Here are your submitted reports. You can view or delete them.</p>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-100 text-green-800 rounded shadow">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <!-- Reports Table -->
-        <div class="overflow-x-auto bg-white shadow-lg rounded-2xl">
+        <div class="bg-white rounded shadow overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-green-50">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Type</th>
+                        <th class="px-4 py-2 text-left">Location</th>
+                        <th class="px-4 py-2 text-left">Description</th>
+                        <th class="px-4 py-2 text-left">Image</th>
+                        <th class="px-4 py-2 text-left">Status</th>
+                        <th class="px-4 py-2 text-left">Actions</th>
                     </tr>
                 </thead>
-
-                <tbody class="divide-y divide-gray-200">
-                    @foreach($reports as $report)
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($reports as $report)
                         <tr class="hover:bg-green-50 transition">
-
-                            <td class="px-6 py-3">{{ $report->id }}</td>
-
-                            <td class="px-6 py-3">
-                                {{ \Illuminate\Support\Str::limit($report->description, 50) }}
-                            </td>
-
-                            <td class="px-6 py-3">
+                            <td class="px-4 py-2">{{ $report->id }}</td>
+                            <td class="px-4 py-2">{{ $report->type }}</td>
+                            <td class="px-4 py-2">{{ $report->location }}</td>
+                            <td class="px-4 py-2">{{ Str::limit($report->description, 50) }}</td>
+                            <td class="px-4 py-2">
                                 @if($report->image)
-                                    <img src="{{ asset('storage/' . $report->image) }}"
-                                         class="w-20 h-16 object-cover rounded-lg shadow">
+                                    <img src="{{ asset('storage/' . $report->image) }}" alt="Report Image"
+                                         class="w-20 h-20 object-cover rounded shadow">
                                 @else
-                                    <span class="text-gray-400">No Image</span>
+                                    <span class="text-gray-500 text-sm">No Image</span>
                                 @endif
                             </td>
-
-                            <td class="px-6 py-3">
-                                @php
-                                    $status = strtolower($report->status);
-                                    $label = ucfirst($status);
-                                    $colors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'in-progress' => 'bg-blue-100 text-blue-800',
-                                        'resolved' => 'bg-green-100 text-green-800',
-                                        'rejected' => 'bg-red-100 text-red-800',
-                                    ];
-                                @endphp
-
-                                <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $colors[$status] ?? 'bg-gray-100 text-gray-700' }}">
-                                    {{ $label }}
+                            <td class="px-4 py-2">
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold
+                                      @if($report->status == 'pending') bg-yellow-100 text-yellow-800
+                                      @elseif($report->status == 'in-progress') bg-blue-100 text-blue-800
+                                      @elseif($report->status == 'resolved') bg-green-100 text-green-800
+                                      @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst($report->status) }}
                                 </span>
                             </td>
-
-                            <td class="px-6 py-3">
-                                <!-- Delete button (only allowed for resolved reports) -->
-                                @if($status === 'resolved')
-                                    <form action="{{ route('report.destroy', $report->id) }}" method="POST"
-                                          onsubmit="return confirm('Are you sure you want to delete this report?');">
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="submit"
-                                            class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
-                                            Delete
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="text-gray-400 text-sm">—</span>
-                                @endif
+                            <td class="px-4 py-2 flex gap-2">
+                                <form action="{{ route('report.destroy', $report) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                                        Delete
+                                    </button>
+                                </form>
                             </td>
-
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-2 text-gray-600 text-center">
+                                No reports submitted yet.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
-    @endif
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $reports->links() }}
+        </div>
+    </main>
+</body>
 
-</div>
-@endsection
+</html>
