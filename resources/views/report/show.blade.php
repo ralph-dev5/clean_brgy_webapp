@@ -62,10 +62,7 @@
                 Back to Reports
             </a>
 
-            <a href="{{ route('admin.reports.edit', $report) }}"
-               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                Edit Report
-            </a>
+            
 
         </div>
 
