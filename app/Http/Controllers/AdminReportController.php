@@ -2,42 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Report;
+use Illuminate\Http\Request;
 
 class AdminReportController extends Controller
 {
     /**
-     * Display reports filtered by status (Pending, In-Progress, Resolved)
+     * Display all reports, grouped by status.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $status = $request->get('status', 'pending');
-
-        $allowedStatuses = ['pending', 'in-progress', 'resolved'];
-        if (!in_array($status, $allowedStatuses)) {
-            $status = 'pending';
-        }
-
-        $reports = Report::with('user')
-            ->where('status', $status)
+        $pendingReports = Report::with('user')
+            ->where('status', 'pending')
             ->latest()
             ->get();
 
-        return view('admin.reports.index', compact('reports', 'status'));
+        $inProgressReports = Report::with('user')
+            ->where('status', 'in-progress')
+            ->latest()
+            ->get();
+
+        $resolvedReports = Report::with('user')
+            ->where('status', 'resolved')
+            ->latest()
+            ->get();
+
+        return view('admin.reports.index', compact(
+            'pendingReports',
+            'inProgressReports',
+            'resolvedReports'
+        ));
     }
 
     /**
-     * Show report details
+     * Show a single report.
      */
     public function show(Report $report)
     {
         $report->load('user');
+
         return view('admin.reports.show', compact('report'));
     }
 
     /**
-     * Edit report view (optional)
+     * Show the edit form for a report.
      */
     public function edit(Report $report)
     {
@@ -45,38 +53,24 @@ class AdminReportController extends Controller
     }
 
     /**
-     * Update report info
+     * Update report fields.
      */
     public function update(Request $request, Report $report)
     {
         $request->validate([
+            'type' => 'required|string|max:255',
             'description' => 'required|string',
-            'location'    => 'nullable|string',
-            'status'      => 'required|in:pending,in-progress,resolved',
+            'status' => 'required|in:pending,in-progress,resolved',
         ]);
 
-        $report->update($request->only(['description', 'location', 'status']));
+        $report->update($request->only('type', 'description', 'status'));
 
-        return redirect()
-            ->route('admin.reports.index', ['status' => $report->status])
+        return redirect()->route('admin.reports.index')
             ->with('success', 'Report updated successfully.');
     }
 
     /**
-     * Delete a report
-     */
-    public function destroy(Report $report)
-    {
-        $report->delete();
-
-        return redirect()
-            ->route('admin.reports.index')
-            ->with('success', 'Report deleted successfully.');
-    }
-
-    /**
-     * Update report status ("Done" button)
-     * Pending → In-Progress → Resolved
+     * Update only the report status (Pending → In Progress → Resolved).
      */
     public function updateStatus(Request $request, Report $report)
     {
@@ -84,23 +78,66 @@ class AdminReportController extends Controller
             'status' => 'required|in:pending,in-progress,resolved',
         ]);
 
-        $report->status = $request->status;
-        $report->save();
+        $report->update(['status' => $request->status]);
 
-        return redirect()
-            ->route('admin.reports.index', ['status' => $request->status])
-            ->with('success', "Report status updated to {$request->status}.");
+        return redirect()->back()->with('success', 'Report status updated successfully!');
     }
 
     /**
-     * Show history (all resolved reports)
+     * Soft delete — move report to Trash.
      */
-    public function history()
+    public function destroy(Report $report)
     {
-        $reports = Report::where('status', 'resolved')
-            ->latest()
+        $report->delete();
+
+        return redirect()->route('admin.reports.index')
+            ->with('success', 'Report moved to Trash.');
+    }
+
+    /**
+     * Display soft-deleted reports (Trash).
+     */
+    public function trash()
+    {
+        $reports = Report::onlyTrashed()
+            ->with('user')
+            ->latest('deleted_at')
             ->get();
 
-        return view('admin.history', compact('reports'));
+        return view('admin.reports.trash', compact('reports'));
+    }
+
+    /**
+     * Restore a report from Trash.
+     */
+    public function restore(int $id)
+    {
+        $report = Report::onlyTrashed()->find($id);
+
+        if (!$report) {
+            return redirect()->back()->with('error', 'Report not found.');
+        }
+
+        $report->restore();
+
+        return redirect()->route('admin.reports.trash')
+            ->with('success', 'Report restored successfully.');
+    }
+
+    /**
+     * Permanently delete a report from Trash.
+     */
+    public function forceDelete(int $id)
+    {
+        $report = Report::onlyTrashed()->find($id);
+
+        if (!$report) {
+            return redirect()->back()->with('error', 'Report not found.');
+        }
+
+        $report->forceDelete();
+
+        return redirect()->route('admin.reports.trash')
+            ->with('success', 'Report permanently deleted.');
     }
 }

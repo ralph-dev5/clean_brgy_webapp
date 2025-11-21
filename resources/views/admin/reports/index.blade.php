@@ -1,121 +1,90 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto mt-12">
+<div class="container mx-auto mt-10">
 
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <a href="{{ route('admin.dashboard') }}"
-           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-            ← Back
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-1">
+            ← Back to Dashboard
         </a>
-
-        <h1 class="text-4xl font-bold text-gray-800 tracking-wide">
-            All Garbage Reports
-        </h1>
-
-        <div></div>
+        <h1 class="text-3xl font-bold text-gray-800">All Reports</h1>
     </div>
 
-    {{-- Card Container --}}
-    <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
-
-        {{-- Status Tabs --}}
-        @php
-            $currentStatus = request('status', 'pending');
-            $statuses = ['pending'=>'Pending', 'in-progress'=>'In Progress', 'resolved'=>'Resolved'];
-        @endphp
-        <div class="flex gap-4 mb-6">
-            @foreach($statuses as $key => $label)
-                <a href="{{ url('/admin/reports?status=' . $key) }}"
-                   class="px-4 py-2 rounded-full font-semibold text-sm
-                   {{ $currentStatus === $key 
-                        ? ($key==='pending'?'bg-yellow-600 text-white':
-                            ($key==='in-progress'?'bg-blue-600 text-white':'bg-green-600 text-white'))
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 transition' }}">
-                    {{ $label }}
-                </a>
-            @endforeach
+    @if(session('success'))
+        <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-6 shadow">
+            {{ session('success') }}
         </div>
+    @endif
 
-        {{-- Table --}}
-        @if($reports->isEmpty())
-            <div class="text-center py-10 text-gray-600 text-lg">
-                No reports found for this category.
-            </div>
-        @else
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse rounded-lg overflow-hidden">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-700 text-sm uppercase">
-                            <th class="p-3 border">ID</th>
-                            <th class="p-3 border">Resident</th>
-                            <th class="p-3 border">Description</th>
-                            <th class="p-3 border">Image</th>
-                            <th class="p-3 border text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-900 text-sm">
-                        @foreach($reports as $report)
-                        <tr class="hover:bg-gray-50 transition border-b">
-                            {{-- ID --}}
-                            <td class="p-3 border text-center font-semibold text-gray-700">
-                                {{ $report->id }}
-                            </td>
+    @php
+        $reportSections = [
+            'Pending Reports' => ['data' => $pendingReports, 'color' => 'yellow-600', 'next_status' => 'in-progress'],
+            'In Progress Reports' => ['data' => $inProgressReports, 'color' => 'blue-600', 'next_status' => 'resolved'],
+            'Resolved Reports' => ['data' => $resolvedReports, 'color' => 'green-600', 'next_status' => null],
+        ];
+    @endphp
 
-                            {{-- Resident --}}
-                            <td class="p-3 border">{{ $report->user->name }}</td>
-
-                            {{-- Description --}}
-                            <td class="p-3 border">{{ Str::limit($report->description,50) }}</td>
-
-                            {{-- Image --}}
-                            <td class="p-3 border text-center">
+    @foreach($reportSections as $sectionName => $section)
+        <h2 class="text-xl font-semibold mt-8 mb-2">{{ $sectionName }}</h2>
+        <div class="bg-white shadow rounded-lg p-4 overflow-x-auto mb-6">
+            <table class="w-full border-collapse table-auto">
+                <thead>
+                    <tr class="bg-gray-100 border-b">
+                        <th class="py-2 px-3 text-left">Type</th>
+                        <th class="py-2 px-3 text-left">Image</th>
+                        <th class="py-2 px-3 text-left">Location</th>
+                        <th class="py-2 px-3 text-left">Status</th>
+                        <th class="py-2 px-3 text-left">Created At</th>
+                        <th class="py-2 px-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($section['data'] as $report)
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="py-2 px-3 font-medium">{{ $report->type ?? '-' }}</td>
+                            <td class="py-2 px-3">
                                 @if($report->image)
-                                    <img src="{{ asset('storage/'.$report->image) }}"
-                                         class="w-20 h-20 object-cover rounded-lg border shadow">
+                                    <img src="{{ asset('storage/' . $report->image) }}" alt="Report Image"
+                                        class="h-16 w-16 object-cover rounded shadow-sm">
                                 @else
-                                    <span class="text-gray-500 italic">No Image</span>
+                                    <span class="text-gray-400">-</span>
                                 @endif
                             </td>
+                            <td class="py-2 px-3">{{ $report->location ?? '-' }}</td>
+                            <td class="py-2 px-3">
+                                <span class="px-2 py-1 rounded text-white bg-{{ $section['color'] }}">
+                                    {{ ucfirst($report->status) }}
+                                </span>
+                            </td>
+                            <td class="py-2 px-3 text-gray-600">{{ $report->created_at->format('M d, Y H:i') }}</td>
+                            <td class="py-2 px-3 flex flex-wrap gap-2">
+                                <a href="{{ route('admin.reports.show', $report) }}"
+                                    class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                    View
+                                </a>
 
-                            {{-- Actions --}}
-                            <td class="p-3 border text-center flex justify-center gap-2">
-                                @if($report->status === 'pending')
-                                    <!-- Move from Pending → In Progress -->
-                                    <form action="{{ route('admin.reports.updateStatus', $report) }}" method="POST">
+                                @if($section['next_status'])
+                                    <form action="{{ route('admin.reports.updateStatus', $report) }}" method="POST" class="inline">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="hidden" name="status" value="in-progress">
-                                        <button class="px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                            Start
-                                        </button>
-                                    </form>
-                                @elseif($report->status === 'in-progress')
-                                    <!-- Move from In Progress → Resolved -->
-                                    <form action="{{ route('admin.reports.updateStatus', $report) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="resolved">
-                                        <button class="px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                        <input type="hidden" name="status" value="{{ $section['next_status'] }}">
+                                        <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">
                                             Done
                                         </button>
                                     </form>
                                 @endif
-
-                                <!-- View Button -->
-                                <a href="{{ route('admin.reports.show',$report) }}"
-                                   class="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    View
-                                </a>
                             </td>
                         </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-4 text-center text-gray-500">No {{ strtolower($sectionName) }} found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endforeach
 
-    </div>
 </div>
 @endsection

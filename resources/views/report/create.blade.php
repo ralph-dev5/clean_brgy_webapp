@@ -1,49 +1,67 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-lg mx-auto p-6 bg-white shadow rounded">
-    <h2 class="text-xl font-bold mb-4">Submit a Report</h2>
+<div class="max-w-4xl mx-auto mt-12 p-6">
 
-    @if($errors->any())
-        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    {{-- Header --}}
+    <div class="flex items-center justify-between mb-6">
+        <a href="{{ route('user.dashboard') }}" 
+           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+            ← Back to Dashboard
+        </a>
+        <h1 class="text-3xl font-bold text-gray-800 tracking-wide">Submit New Report</h1>
+        <div></div>
+    </div>
+
+    {{-- Success Message --}}
+    @if(session('success'))
+        <div class="mb-6 px-4 py-3 bg-green-100 text-green-800 rounded-lg">
+            {{ session('success') }}
         </div>
     @endif
 
-    <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+    {{-- Report Form --}}
+    <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+        <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            @csrf
 
-        <!-- Type -->
-        <label for="type" class="block font-semibold">Type</label>
-        <select name="type" id="type" class="w-full border px-3 py-2 rounded mb-4" required>
-            <option value="">-- Select type --</option>
-            <option value="Garbage" {{ old('type') == 'Garbage' ? 'selected' : '' }}>Garbage</option>
-            <option value="Road Issue" {{ old('type') == 'Road Issue' ? 'selected' : '' }}>Road Issue</option>
-        </select>
+            {{-- Type --}}
+            <div>
+                <label class="block font-semibold text-gray-700">Type</label>
+                <input type="text" name="type" value="{{ old('type') }}"
+                       class="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring focus:ring-blue-200">
+                @error('type') 
+                    <span class="text-red-600 text-sm">{{ $message }}</span> 
+                @enderror
+            </div>
 
-        <!-- Location -->
-        <label for="location" class="block font-semibold">Location</label>
-        <input type="text" name="location" id="location" value="{{ old('location') }}"
-               placeholder="E.g., Street, Barangay" required
-               class="w-full border px-3 py-2 rounded mb-4">
+            {{-- Description --}}
+            <div>
+                <label class="block font-semibold text-gray-700">Description</label>
+                <textarea name="description" rows="4"
+                          class="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring focus:ring-blue-200">{{ old('description') }}</textarea>
+                @error('description') 
+                    <span class="text-red-600 text-sm">{{ $message }}</span> 
+                @enderror
+            </div>
 
-        <!-- Description -->
-        <label for="description" class="block font-semibold">Description</label>
-        <textarea name="description" id="description" rows="4" placeholder="Describe the issue..." required
-                  class="w-full border px-3 py-2 rounded mb-4">{{ old('description') }}</textarea>
+            {{-- Image --}}
+            <div>
+                <label class="block font-semibold text-gray-700">Attach Image (optional)</label>
+                <input type="file" name="image" class="mt-1">
+                @error('image') 
+                    <span class="text-red-600 text-sm">{{ $message }}</span> 
+                @enderror
+            </div>
 
-        <!-- Image -->
-        <label for="image" class="block font-semibold">Image (optional)</label>
-        <input type="file" name="image" id="image" accept="image/*" class="mb-4">
-
-        <button type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-            Submit Report
-        </button>
-    </form>
+            {{-- Submit --}}
+            <div class="flex gap-4">
+                <button type="submit"
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('image');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('type'); // type of report
             $table->text('description');
+            $table->string('image')->nullable(); // optional image
+            $table->enum('status', ['pending', 'in-progress', 'resolved'])->default('pending');
             $table->timestamps();
+            $table->softDeletes(); // for trash functionality
         });
     }
 

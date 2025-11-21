@@ -3,42 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Report;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
     /**
-     * Show the admin dashboard.
+     * Show the admin dashboard with stats and recent reports.
      */
     public function dashboard()
     {
-        $user = auth()->user();
+        $admin = Auth::user();
 
-        // Fetch all reports for admin
-        $reports = Report::with('user')->latest()->get();
+        // Dashboard statistics
+        $totalUsers        = User::count();
+        $totalReports      = Report::count();
+        $pendingReports    = Report::where('status', 'pending')->count();
+        $inProgressReports = Report::where('status', 'in-progress')->count();
+        $resolvedReports   = Report::where('status', 'resolved')->count();
 
-        return view('dashboard.admin', compact('user', 'reports'));
-    }
+        // Latest 10 reports with associated user
+        $recentReports = Report::with('user')->latest()->take(10)->get();
 
-    /**
-     * Show the admin profile page.
-     */
-    public function profile()
-    {
-        $user = auth()->user();
-        return view('dashboard.profile', compact('user'));
-    }
-
-    /**
-     * Show the admin history page.
-     */
-    public function history()
-    {
-        $user = auth()->user();
-
-        // Example: Fetch reports created by the admin
-        $reports = Report::where('user_id', $user->id)->latest()->get();
-
-        return view('dashboard.history', compact('user', 'reports'));
+        // Pass all data to the admin dashboard view
+        // Updated view path to match resources/views/admin/dashboard.blade.php
+        return view('admin.dashboard', [
+            'admin'             => $admin,
+            'totalUsers'        => $totalUsers,
+            'totalReports'      => $totalReports,
+            'pendingReports'    => $pendingReports,
+            'inProgressReports' => $inProgressReports,
+            'resolvedReports'   => $resolvedReports,
+            'recentReports'     => $recentReports,
+        ]);
     }
 }

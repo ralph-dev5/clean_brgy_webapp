@@ -6,7 +6,9 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    // Global HTTP middleware
+    /**
+     * Global HTTP middleware stack
+     */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
@@ -16,7 +18,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
-    // Middleware groups
+    /**
+     * Middleware groups
+     */
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -26,7 +30,6 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\PreventBackAfterLogin::class,
-
         ],
 
         'api' => [
@@ -35,11 +38,15 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    // Route middleware
+    /**
+     * Route middleware
+     * Keys here are used in your routes, e.g., 'user' => UserMiddleware
+     */
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'auth'     => \App\Http\Middleware\Authenticate::class,
+        'admin'    => \App\Http\Middleware\AdminMiddleware::class,
+        'user'     => \App\Http\Middleware\UserMiddleware::class, 
+        'guest'    => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 }
