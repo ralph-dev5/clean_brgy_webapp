@@ -7,7 +7,7 @@
         <!-- Back to Welcome Page Button -->
         <div class="mb-6 text-left">
             <a href="{{ url('/') }}" class="text-green-600 text-sm hover:underline">
-                &larr; Back to Welcome
+                Back
             </a>
         </div>
 

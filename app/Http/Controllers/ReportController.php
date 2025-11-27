@@ -25,15 +25,16 @@ class ReportController extends Controller
         $request->validate([
             'location' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048', // 2MB max
         ]);
 
         $report = new Report();
         $report->user_id = Auth::id();
-        $report->location = $request->location;   // <-- use location now
+        $report->location = $request->location;
         $report->description = $request->description;
         $report->status = 'pending';
 
+        // Handle uploaded report image
         if ($request->hasFile('image')) {
             $report->image = $request->file('image')->store('reports', 'public');
         }
@@ -46,7 +47,21 @@ class ReportController extends Controller
     }
 
     /**
-     * Delete a report.
+     * Show a specific report (for the VIEW functionality).
+     */
+    public function show($id)
+    {
+        $report = Report::findOrFail($id);
+
+        if ($report->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('report.show', compact('report'));
+    }
+
+    /**
+     * Delete a report along with its image from storage.
      */
     public function destroy($id)
     {
@@ -56,6 +71,7 @@ class ReportController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // Delete report image if exists
         if ($report->image && Storage::disk('public')->exists($report->image)) {
             Storage::disk('public')->delete($report->image);
         }
@@ -65,5 +81,34 @@ class ReportController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Report deleted successfully!');
+    }
+
+    /**
+     * Optional: Update the report's image (new feature)
+     */
+    public function updateImage(Request $request, $id)
+    {
+        $report = Report::findOrFail($id);
+
+        if ($report->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'image' => 'required|image|max:2048',
+        ]);
+
+        // Delete old image if exists
+        if ($report->image && Storage::disk('public')->exists($report->image)) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        // Store new image
+        $report->image = $request->file('image')->store('reports', 'public');
+        $report->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Report image updated successfully!');
     }
 }

@@ -70,7 +70,7 @@ class AdminReportController extends Controller
     }
 
     /**
-     * Update only the report status (Pending → In Progress → Resolved).
+     * Update only the report status manually.
      */
     public function updateStatus(Request $request, Report $report)
     {
@@ -84,13 +84,46 @@ class AdminReportController extends Controller
     }
 
     /**
+     * Advance the report to the next status: Pending → In Progress → Resolved.
+     * This replaces the old "resolve" method for the check button functionality.
+     */
+    public function advanceStatus(Request $request, Report $report)
+    {
+        switch ($report->status) {
+            case 'pending':
+                $report->update(['status' => 'in-progress']);
+                break;
+            case 'in-progress':
+                $report->update(['status' => 'resolved']);
+                break;
+            case 'resolved':
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'new_status' => $report->status,
+                        'message' => 'Report is already resolved.'
+                    ], 200);
+                }
+
+                return redirect()->back()->with('info', 'Report is already resolved.');
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'new_status' => $report->status,
+                'message' => 'Report status advanced successfully!'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Report status advanced successfully!');
+    }
+
+    /**
      * Soft delete — move report to Trash.
      */
     public function destroy(Report $report)
     {
         $report->delete();
 
-        // Redirect to admin dashboard welcome page
         return redirect()->route('admin.dashboard')
                          ->with('success', 'Report moved to Trash.');
     }

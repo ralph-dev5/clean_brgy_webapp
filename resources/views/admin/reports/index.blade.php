@@ -1,136 +1,133 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto mt-10">
+<div class="flex min-h-screen bg-gray-50">
 
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-        <a href="{{ route('admin.dashboard') }}"
-           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-1">
-            ← Back to Dashboard
-        </a>
-        <h1 class="text-3xl font-bold text-gray-800">All Reports</h1>
-    </div>
+    <!-- Main content -->
+    <main class="flex-1 p-8">
 
-    <!-- Success message -->
-    @if(session('success'))
-        <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-6 shadow">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @php
-        $reportSections = [
-            'Pending Reports' => [
-                'data' => $pendingReports,
-                'color' => 'yellow-600',
-                'next_status' => 'in-progress'
-            ],
-            'In Progress Reports' => [
-                'data' => $inProgressReports,
-                'color' => 'blue-600',
-                'next_status' => 'resolved'
-            ],
-            'Resolved Reports' => [
-                'data' => $resolvedReports,
-                'color' => 'green-600',
-                'next_status' => null
-            ],
-        ];
-    @endphp
-
-    <!-- Loop Report Sections -->
-    @foreach($reportSections as $sectionName => $section)
-
-        <h2 class="text-xl font-semibold mt-10 mb-3">{{ $sectionName }}</h2>
-
-        <div class="bg-white shadow rounded-xl p-5 overflow-x-auto mb-10">
-
-            <table class="w-full table-auto border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 border-b text-gray-700">
-                        <th class="py-3 px-3 text-left">ID</th>
-                        <th class="py-3 px-3 text-left">Image</th>
-                        <th class="py-3 px-3 text-left">Location</th>
-                        <th class="py-3 px-3 text-left">Status</th>
-                        <th class="py-3 px-3 text-left">Created At</th>
-                        <th class="py-3 px-3 text-left">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse($section['data'] as $report)
-                        <tr class="border-b hover:bg-gray-50 transition">
-                            
-                            <!-- ID -->
-                            <td class="py-3 px-3 font-medium">{{ $report->id }}</td>
-
-                            <!-- Image -->
-                            <td class="py-3 px-3">
-                                @if($report->image)
-                                    <img src="{{ asset('storage/' . $report->image) }}"
-                                         class="h-16 w-16 object-cover rounded-lg shadow-sm"
-                                         alt="Report Image">
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
-
-                            <!-- Location -->
-                            <td class="py-3 px-3">{{ $report->location ?? '-' }}</td>
-
-                            <!-- Status -->
-                            <td class="py-3 px-3">
-                                <span class="px-2 py-1 rounded text-white bg-{{ $section['color'] }}">
-                                    {{ ucfirst($report->status) }}
-                                </span>
-                            </td>
-
-                            <!-- Created At -->
-                            <td class="py-3 px-3 text-gray-600">
-                                {{ $report->created_at->format('M d, Y H:i') }}
-                            </td>
-
-                            <!-- Actions -->
-                            <td class="py-3 px-3 flex flex-wrap gap-2">
-
-                                <!-- View -->
-                                <a href="{{ route('admin.reports.show', $report) }}"
-                                   class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    View
-                                </a>
-
-                                <!-- Change Status -->
-                                @if($section['next_status'])
-                                    <form action="{{ route('admin.reports.updateStatus', $report) }}"
-                                          method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-
-                                        <input type="hidden" name="status" value="{{ $section['next_status'] }}">
-
-                                        <button class="px-3 py-1.5 bg-white text-white rounded-lg hover:bg-gray-100 transition">
-                                            ✅
-                                        </button>
-                                    </form>
-                                @endif
-
-                            </td>
-                        </tr>
-
-                    @empty
-                        <tr>
-                            <td colspan="6" class="py-4 text-center text-gray-500">
-                                No {{ strtolower($sectionName) }} found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-
-            </table>
+        <!-- Back button -->
+        <div class="mb-6">
+            <a href="{{ route('admin.dashboard') }}"
+                class="inline-block px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 shadow-sm transition">
+                Back
+            </a>
         </div>
 
-    @endforeach
+        <!-- Reports Sections -->
+        <div class="space-y-12">
 
+            @foreach ([
+                'pendingReports' => ['title' => 'Pending Reports ⏳', 'color' => 'yellow'],
+                'inProgressReports' => ['title' => 'In Progress Reports 🔄', 'color' => 'blue'],
+                'resolvedReports' => ['title' => 'Resolved Reports ✅', 'color' => 'green']
+            ] as $reportsVar => $info)
+            <section>
+                <h2 class="text-2xl font-bold mb-4 text-{{ $info['color'] }}-700">{{ $info['title'] }}</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border rounded-lg overflow-hidden shadow-sm">
+                        <thead class="bg-{{ $info['color'] }}-100 text-{{ $info['color'] }}-800 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left">ID</th>
+                                <th class="px-4 py-3 text-left">Image</th>
+                                <th class="px-4 py-3 text-left">Location</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                                <th class="px-4 py-3 text-left">Created At</th>
+                                <th class="px-4 py-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($$reportsVar as $report)
+                            <tr class="border-b hover:bg-{{ $info['color'] }}-50 transition" data-report-id="{{ $report->id }}">
+                                <td class="px-4 py-3">{{ $report->id }}</td>
+                                <td class="px-4 py-3">
+                                    @if($report->image)
+                                    <img src="{{ asset('storage/' . $report->image) }}" class="w-16 h-16 object-cover rounded" alt="Report Image">
+                                    @else
+                                    <span class="text-gray-400">No Image</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3">{{ $report->location }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 rounded-full text-sm font-semibold
+                                        @if($report->status === 'pending') bg-yellow-200 text-yellow-800
+                                        @elseif($report->status === 'in-progress') bg-blue-200 text-blue-800
+                                        @else bg-green-200 text-green-800 @endif">
+                                        {{ ucfirst($report->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">{{ $report->created_at->format('M d, Y H:i') }}</td>
+                                <td class="px-4 py-3 flex gap-2">
+                                    <a href="{{ route('admin.reports.show', $report) }}"
+                                        class="font-semibold hover:underline text-{{ $info['color'] }}-800">View</a>
+
+                                    @if($report->status !== 'resolved')
+                                    <!-- Minimal check button -->
+                                    <button type="button"
+                                        class="advance-btn transform transition-transform duration-200 hover:scale-125"
+                                        data-report-id="{{ $report->id }}">✅
+                                    </button>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-6 text-gray-500">
+                                    No {{ strtolower($info['title']) }} found.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            @endforeach
+
+        </div>
+    </main>
 </div>
+
+<!-- AJAX Advance Button Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    document.querySelectorAll('.advance-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+            const reportId = button.dataset.reportId;
+
+            try {
+                const res = await fetch(`/admin/reports/${reportId}/advance`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    const row = button.closest('tr');
+                    const statusCell = row.querySelector('td:nth-child(4) span');
+                    statusCell.textContent = data.new_status;
+
+                    // Update badge color
+                    statusCell.className = 'px-2 py-1 rounded-full text-sm font-semibold';
+                    if (data.new_status === 'pending') statusCell.classList.add('bg-yellow-200', 'text-yellow-800');
+                    else if (data.new_status === 'in-progress') statusCell.classList.add('bg-blue-200', 'text-blue-800');
+                    else if (data.new_status === 'resolved') statusCell.classList.add('bg-green-200', 'text-green-800');
+
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to update status.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Something went wrong!');
+            }
+        });
+    });
+});
+</script>
 @endsection
